@@ -33,7 +33,7 @@
     "PythonEmbedInR": {
       "Package": "PythonEmbedInR",
       "Version": "0.8.4",
-      "Source": "unknown",
+      "Source": "http://ran.synapse.org",
       "Hash": "e7db89b604959537c579c8f653118b1c"
     },
     "R6": {
@@ -830,7 +830,7 @@
     "synapser": {
       "Package": "synapser",
       "Version": "0.11.7",
-      "Source": "unknown",
+      "Source": "http://ran.synapse.org",
       "Hash": "5db4c1bd16b45ec79a888938a0f3ce66"
     },
     "sys": {
