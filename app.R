@@ -24,12 +24,12 @@ ui <- fluidPage(
       
       textInput(inputId = "synid_root",
                   label = "Root synapse ID:",
-                  value = "",
+                  value = "syn26453932",
                   placeholder = "syn12345"),
       
       textInput(inputId = "personage_name",
                 label = "User or team name:",
-                value = "",
+                value = "SALV Demo",
                 placeholder = "username"),
       
       selectizeInput(inputId = "entity_type",
