@@ -1,4 +1,5 @@
-# Description:
+# Description: Shiny app for querying Synapse permissions across a folder
+#     hierarchy.
 # Author: Haley Hunter-Zinck
 # Date: 2021-10-06
 

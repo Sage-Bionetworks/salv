@@ -7,7 +7,6 @@
 tic = as.double(Sys.time())
 
 library(glue)
-#library(dplyr)
 library(testthat)
 library(synapser)
 synLogin()
