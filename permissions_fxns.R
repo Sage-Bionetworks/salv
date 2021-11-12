@@ -102,7 +102,7 @@ get_entity_name <- function(synapse_ids) {
 #' @example is_team("my_team_name")
 is_team <- function(personage_name) {
   
-  res <- tryCatch(length(synGetTeam(personage_name)), 
+  res <- tryCatch(length(synGetTeam(as.character(personage_name))), 
                   error = function(cond) {return(0)})
   
   return(as.logical(res))
@@ -114,7 +114,7 @@ is_team <- function(personage_name) {
 #' @return TRUE if name relates to a Synapse user; otherwise FALSE
 #' @example is_user("my_user_name")
 is_user <- function(personage_name) {
-  res <- tryCatch(length(synGetUserProfile(personage_name)), 
+  res <- tryCatch(length(synGetUserProfile(as.character(personage_name))), 
                   error = function(cond) {return(0)})
   
   return(as.logical(res))
@@ -154,6 +154,44 @@ get_user_id <- function(user_name) {
 get_team_id <- function(team_name) {
   if (is_team(team_name)) {
     return(synGetTeam(team_name)$id)
+  }
+  
+  return(NA)
+}
+
+get_personage_id <- function(personage_name) {
+  
+  if (personage_name == "") {
+    return("")
+  }
+  
+  if (is_team(personage_name)) {
+    return(synGetTeam(personage_name)$id)
+  } 
+  
+  if (is_user(personage_name)) {
+    return(synGetUserProfile(personage_name)$ownerId)
+  }
+  
+  return(NA)
+}
+
+get_personage_name <- function(personage_id) {
+  
+  if (personage_id == "273948") {
+    return("Registered")
+  }
+  
+  if (personage_id == "273949") {
+    return("Public")
+  }
+  
+  if (is_team(personage_id)) {
+    return(synGetTeam(personage_id)$name)
+  } 
+  
+  if (is_user(personage_id)) {
+    return(synGetUserProfile(personage_id)$userName)
   }
   
   return(NA)
@@ -224,6 +262,38 @@ get_permissions_rest <- function(synapse_id, personage_id) {
   
   return(NULL)
 }
+
+get_permissions_by_personage <- function(synapse_id) {
+  
+  acl <- tryCatch({
+    synRestGET(glue("/entity/{synapse_id}/acl"))
+  }, error = function(cond) {
+    return(synRestGET(tail(strsplit(cond[[1]], split = " ")[[1]], 1)))
+  })
+  
+  personage_ids <- as.character(unlist(lapply(acl$resourceAccess, 
+                                              function(x) {return(x$principalId)})))
+  
+  if (length(personage_ids)) {
+    
+    personage_names <- c()
+    access_types <- c()
+    
+    for (i in 1:length(personage_ids)) {
+      
+      personage_names[i] <- get_personage_name(personage_ids[i])
+      permissions_raw <- unlist(acl$resourceAccess[[i]]$accessType)
+      access_types[i] <- MAP_PERMISSIONS[paste0(sort(permissions_raw), collapse = ",")]
+    }
+    
+    idx <- order(personage_names)
+    bnd <-  rbind(personage_names[idx], access_types[idx])
+    return(paste0(apply(bnd, 2, paste0, collapse = ": "), collapse = "\n"))
+  }
+
+  return(NULL)
+}
+
 
 #' Get standardized permission label for a given user name and a 
 #' Synapse ID representing a project, folder, file, table or other Synapse
@@ -305,7 +375,12 @@ get_permissions <- function(personage_id, synapse_ids) {
   
   permissions <- c()
   
-  if(is_team(personage_id)) {
+  if (personage_id == "") {
+    for (i in 1:length(synapse_ids)) {
+      permissions[i] <- get_permissions_by_personage(synapse_ids[i])
+    }
+    permissions <- setNames(permissions, synapse_ids)
+  } else if(is_team(personage_id)) {
     permissions <- get_team_entity_permission(personage_id, synapse_ids)
   } else {
     permissions <- get_user_entity_ranking_permission(personage_id, synapse_ids)
@@ -329,9 +404,16 @@ plot_graph <- function(edgelist,
                        size = 5,
                        title = "") {
   
+  group_column <- c()
+  if (all(is.element(unique(node_group), RANK_PERMISSIONS))) {
+    group_column <- factor(node_group, levels = RANK_PERMISSIONS)
+  } else {
+    group_column <- node_group
+  }
+  
   df_vertices <- data.frame(name = names(node_group),
                             label = node_label, 
-                            group = factor(node_group, levels = RANK_PERMISSIONS),
+                            group = group_column,
                             stringsAsFactors = T,
                             row.names = NULL)
   obj_igraph <- graph_from_data_frame(edgelist, 
@@ -346,7 +428,7 @@ plot_graph <- function(edgelist,
     geom_point_interactive(data = obj_layout,
                           aes(x = x, 
                               y = y, 
-                              tooltip = glue("{label}\n({name})"),
+                              tooltip = glue("{label}\n{name}\n---\n{group}"),
                               color = group),
                           size = size) +
     theme_void() +
@@ -377,7 +459,7 @@ plot_point <- function(id,
     geom_point_interactive(data = df,
                            aes(x = x, 
                                y = y, 
-                               tooltip = glue("{name}\n({id})"),
+                               tooltip = glue("{name}\n{id}\n---\n{group}"),
                                color = group),
                            size = size) +
     theme_void() +

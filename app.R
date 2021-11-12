@@ -28,7 +28,7 @@ ui <- fluidPage(
                   placeholder = "syn12345"),
       
       textInput(inputId = "personage_name",
-                label = "User or team name:",
+                label = "User or team name (optional):",
                 value = "SALV Demo",
                 placeholder = "username"),
       
@@ -57,8 +57,7 @@ server <- function(input, output) {
   
   observeEvent(input$plot, {
     
-    if (!is_team(input$personage_name) && !is_user(input$personage_name)) {
-      
+    if (input$personage_name != "" && !(is_team(input$personage_name) || is_user(input$personage_name))) {
       id <- showNotification("Plotting...", duration = NULL)
       g <- girafe(ggobj = plot_text(glue("Personage name '{input$personage_name}'\nis not a valid team or user name.")))
       removeNotification(id)
@@ -77,11 +76,7 @@ server <- function(input, output) {
       removeNotification(id)
       
       id <- showNotification("Querying permissions...", duration = NULL)
-      if (is_team(input$personage_name)) {
-        personage_id <- get_team_id(input$personage_name)
-      } else {
-        personage_id <- get_user_id(input$personage_name)
-      }
+      personage_id <- get_personage_id(if (is.null(input$personage_name)) "" else input$personage_name)
       permissions <- get_permissions(personage_id = personage_id, 
                                      synapse_ids = synapse_ids)
       removeNotification(id)
@@ -109,5 +104,5 @@ server <- function(input, output) {
   })
 }
 
-# Run the app ----
+# launch app -------------------------------
 shinyApp(ui = ui, server = server)
