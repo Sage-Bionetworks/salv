@@ -5,6 +5,10 @@
       {
         "Name": "CRAN",
         "URL": "https://cloud.r-project.org"
+      },
+      {
+        "Name": "SAGE",
+        "URL": "http://ran.synapse.org"
       }
     ]
   },
@@ -33,7 +37,8 @@
     "PythonEmbedInR": {
       "Package": "PythonEmbedInR",
       "Version": "0.8.4",
-      "Source": "http://ran.synapse.org",
+      "Source": "Repository",
+      "Repository": "SAGE",
       "Hash": "e7db89b604959537c579c8f653118b1c"
     },
     "R6": {
@@ -830,7 +835,8 @@
     "synapser": {
       "Package": "synapser",
       "Version": "0.11.7",
-      "Source": "http://ran.synapse.org",
+      "Source": "Repository",
+      "Repository": "SAGE",
       "Hash": "5db4c1bd16b45ec79a888938a0f3ce66"
     },
     "sys": {
