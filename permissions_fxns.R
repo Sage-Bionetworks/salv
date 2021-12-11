@@ -9,16 +9,6 @@
 
 # setup -------------------------------------
 
-library(synapser)
-synLogin()
-library(glue)
-library(ggraph)
-library(ggiraph)
-library(igraph)
-library(tidyverse)
-library(RColorBrewer)
-
-
 # constants
 RANK_PERMISSIONS <- c("Administrator", "Can edit & delete", "Can edit", "Can download", "Can view", "None")
 MAP_PERMISSIONS <- setNames(c("Can view", "Can download", "Can edit", "Can edit & delete", "Administrator"),
